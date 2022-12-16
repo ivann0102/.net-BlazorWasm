@@ -1,0 +1,28 @@
+﻿@page "/teachers/create"
+@inject HttpClient client
+
+<h3>Create teacher</h3>
+<EditForm Model="teacher" OnValidSubmit="SaveTeacher">
+    <label for="name">Name</label>
+    <InputText @bind-Value="teacher.Name" id="name" />
+    <br />
+    <label for="surname">Surname</label>
+    <InputText @bind-Value="teacher.Surname" id="surname" />
+    <br />
+    <label for="byFather">ByFather</label>
+    <InputText @bind-Value="teacher.ByFather" id="byFather" />
+    <br />
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <button type="submit">Save</button>
+</EditForm>
+@code {
+    [Inject] NavigationManager navigationManager { get; set; } = null!;
+    private Teacher teacher = new Teacher();
+    private async Task SaveTeacher()
+    {
+        await client.PostAsJsonAsync("api/teacher", teacher);
+        navigationManager.NavigateTo("/teachers");
+    }
+}

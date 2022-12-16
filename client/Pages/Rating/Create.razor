@@ -1,0 +1,57 @@
+﻿@page "/ratings/create"
+@inject HttpClient client
+
+<h3>Create rating</h3>
+<EditForm Model="rating" OnValidSubmit="SaveRating">
+    <label for="grade">Grade</label>
+    <InputNumber @bind-Value="rating.Grade" id="grade" />
+    <br />
+    <label for="course">Course</label>
+    <InputSelect @bind-Value="rating.CourseId" id="course">
+        <option value="">Select...</option>
+        @foreach (var course in courses)
+        {
+            <option value="@course.Id">@course.Name</option>
+        }
+    </InputSelect>
+    <br />
+    <label for="student">Student</label>
+    <InputSelect @bind-Value="rating.StudentId" id="student">
+        <option value="">Select...</option>
+
+        @foreach (var student in students)
+        {
+            <option value="@student.Id">@student.FullName</option>
+        }
+    </InputSelect>
+    <br />
+    <label for="date">Date</label>
+    <InputDate @bind-Value="rating.Date" id="date" />
+    <br />
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <button type="submit">Save</button>
+</EditForm>
+@code {
+    [Inject] NavigationManager navigationManager { get; set; } = null!;
+    private Rating rating = new Rating();
+    private List<Student> students = new List<Student>();
+    private Student student = new Student();
+    private Course course = new Course();
+    private List<Course> courses = new List<Course>();
+    protected override async Task OnInitializedAsync()
+    {
+        courses = await client.GetFromJsonAsync<List<Course>>("api/course");
+        students = await client.GetFromJsonAsync<List<Student>>("api/student");
+    }
+    private async Task SaveRating()
+    {
+        student = await client.GetFromJsonAsync<Student>($"api/student/{rating.StudentId}");
+        rating.Student = student;
+        course = await client.GetFromJsonAsync<Course>($"api/course/{rating.CourseId}");
+        rating.Course = course;
+        await client.PostAsJsonAsync("api/rating", rating);
+        navigationManager.NavigateTo("/ratings");
+    }
+}

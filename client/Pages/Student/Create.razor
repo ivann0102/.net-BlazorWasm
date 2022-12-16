@@ -1,0 +1,34 @@
+﻿@page "/students/create"
+@inject HttpClient client
+
+<h3>Create student</h3>
+<EditForm Model="student" OnValidSubmit="SaveStudent">
+    <label for="name">Name</label>
+    <InputText @bind-Value="student.Name" id="name" />
+    <br />
+    <label for="surname">Surname</label>
+    <InputText @bind-Value="student.Surname" id="surname" />
+    <br />
+    <label for="byFather">ByFather</label>
+    <InputText @bind-Value="student.ByFather" id="byFather" />
+    <br />
+    <label for="birthday">Birthday</label>
+    <InputDate @bind-Value="student.Birthday" id="birthday" />
+    <br />
+    <label for="phone">Phone</label>
+    <InputText @bind-Value="student.Phone" id="phone" />
+    <br />
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <button type="submit">Save</button>
+</EditForm>
+@code {
+    [Inject] NavigationManager navigationManager { get; set; } = null!;
+    private Student student = new Student();
+    private async Task SaveStudent()
+    {
+        await client.PostAsJsonAsync("api/student", student);
+        navigationManager.NavigateTo("/students");
+    }
+}

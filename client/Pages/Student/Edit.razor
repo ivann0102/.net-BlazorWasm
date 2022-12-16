@@ -1,0 +1,39 @@
+﻿@page "/students/{id:int}"
+@inject HttpClient client
+
+<h3>Edit student</h3>
+<EditForm Model="student" OnValidSubmit="EditStudent">
+    <label for="name">Name</label>
+    <InputText @bind-Value="student.Name" id="name" />
+    <br />
+    <label for="surname">Surname</label>
+    <InputText @bind-Value="student.Surname" id="surname" />
+    <br />
+    <label for="byFather">ByFather</label>
+    <InputText @bind-Value="student.ByFather" id="byFather" />
+    <br />
+    <label for="birthday">Birthday</label>
+    <InputDate @bind-Value="student.Birthday" id="birthday" />
+    <br />
+    <label for="phone">Phone</label>
+    <InputText @bind-Value="student.Phone" id="phone" />
+    <br />
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <button type="submit">Save</button>
+</EditForm>
+@code {
+    [Inject] NavigationManager navigationManager { get; set; } = null!;
+    [Parameter] public int id { get; set; }
+    private Student student = new Student();
+    protected override async Task OnParametersSetAsync()
+    {
+        student = await client.GetFromJsonAsync<Student>($"api/student/{id}");
+    }
+    private async Task EditStudent()
+    {
+        await client.PutAsJsonAsync("api/student", student);
+        navigationManager.NavigateTo("/students");
+    }
+}

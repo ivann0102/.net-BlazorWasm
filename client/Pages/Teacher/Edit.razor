@@ -1,0 +1,34 @@
+﻿@page "/teachers/{id:int}"
+@inject HttpClient client
+
+<h3>Edit teacher</h3>
+<EditForm Model="teacher" OnValidSubmit="EditTeacher">
+    <label for="name">Name</label>
+    <InputText @bind-Value="teacher.Name" id="name" />
+    <br />
+    <label for="surname">Surname</label>
+    <InputText @bind-Value="teacher.Surname" id="surname" />
+    <br />
+    <label for="byFather">ByFather</label>
+    <InputText @bind-Value="teacher.ByFather" id="byFather" />
+    <br />
+
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <button type="submit">Save</button>
+</EditForm>
+@code {
+    [Inject] NavigationManager navigationManager { get; set; } = null!;
+    [Parameter] public int id { get; set; }
+    private Teacher teacher = new Teacher();
+    protected override async Task OnParametersSetAsync()
+    {
+        teacher = await client.GetFromJsonAsync<Teacher>($"api/teacher/{id}");
+    }
+    private async Task EditTeacher()
+    {
+        await client.PutAsJsonAsync("api/teacher", teacher);
+        navigationManager.NavigateTo("/teachers");
+    }
+}

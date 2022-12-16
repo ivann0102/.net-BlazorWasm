@@ -1,0 +1,42 @@
+﻿@page "/courses/create"
+@inject HttpClient client
+
+<h3>Create course</h3>
+<EditForm Model="course" OnValidSubmit="SaveCourse">
+    <label for="name">Name</label>
+    <InputText @bind-Value="course.Name" id="name" />
+    <br />
+    <label for="course">Teacher</label>
+    <InputSelect @bind-Value="course.TeacherId" id="course">
+        <option value="">Select...</option>
+        @foreach (var teacher in teachers)
+        {
+            <option value="@teacher.Id">@teacher.FullName</option>
+        }
+    </InputSelect>
+    <br />
+    <label for="maxGrade">MaxGrade</label>
+    <InputNumber @bind-Value="course.MaxGrade" id="maxGrade" />
+    <br />
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <button type="submit">Save</button>
+</EditForm>
+@code {
+    [Inject] NavigationManager navigationManager { get; set; } = null!;
+    private Course course = new Course();
+    private List<Teacher> teachers = new List<Teacher>();
+    private Teacher teacher;
+    protected override async Task OnInitializedAsync()
+    {
+        teachers = await client.GetFromJsonAsync<List<Teacher>>("api/teacher");
+    }
+    private async Task SaveCourse()
+    {
+        teacher = await client.GetFromJsonAsync<Teacher>($"api/teacher/{course.TeacherId}");
+        course.Teacher = teacher;
+        await client.PostAsJsonAsync("api/course", course);
+        navigationManager.NavigateTo("/courses");
+    }
+}

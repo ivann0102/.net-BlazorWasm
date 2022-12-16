@@ -1,0 +1,47 @@
+﻿@page "/ratings"
+@inject HttpClient client
+
+<h3>Ratings</h3>
+<a href="/ratings/create">Create</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Grade</th>
+            <th>Date</th>
+            <th>Student</th>
+            <th>Course</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var rating in ratings)
+        {
+            <tr>
+                <td>@rating.Grade</td>
+                <td>@rating.Date</td>
+                <td>@rating.Student.FullName</td>
+                <td>@rating.Course.Name</td>
+                <td>
+                    <a href="/ratings/@rating.Id">Edit</a>
+                </td>
+                <td>
+                    <button class="btn btn-danger" @onclick="@(() => Delete(rating.Id))">Delete</button>
+                </td>
+
+            </tr>
+        }
+    </tbody>
+</table>
+@code {
+    List<Rating> ratings = new List<Rating>();
+    protected override async Task OnInitializedAsync()
+    {
+        ratings = await client.GetFromJsonAsync<List<Rating>>("api/rating");
+    }
+    async Task Delete(int id)
+    {
+        await client.DeleteAsync($"api/rating/{id}");
+        await OnInitializedAsync();
+    }
+}
